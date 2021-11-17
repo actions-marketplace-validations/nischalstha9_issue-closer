@@ -4,7 +4,10 @@ pattern = re.compile(r'(close|closes|closed|fix|fixes|fixed|resolve|resolves|res
 from github import Github
 
 print(os.environ)
+
 token = os.environ['token']
+token2 = os.environ['TOKEN']
+print("=====>",token2)
 base_branch = os.environ['base_branch']
 
 def close_issue_from_commit_msg(commit):
