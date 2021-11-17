@@ -1,0 +1,22 @@
+name: "Naxa's Issue Closer"
+author: "nischalstha9@gmail.com"
+description: 'Close issues using special keywords just like github but you can choose branch'
+inputs:
+  repo:
+    description: 'repo name'
+    required: true
+  token:
+    description: 'Token for the repo. Can be passed in using {{ secrets.GITHUB_TOKEN }}'
+    required: true
+  base_branch:
+    description: 'Base branch of repo'
+    required: true
+  # config:
+  #   description: 'JSON with settings as described in the README'
+  #   required: true
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+branding:
+  icon: 'check-circle'  
+  color: 'green'
