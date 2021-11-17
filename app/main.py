@@ -3,7 +3,7 @@ pattern = re.compile(r'(close|closes|closed|fix|fixes|fixed|resolve|resolves|res
 
 from github import Github
 
-token = os.environ['GH_TOKEN']
+token = os.environ['token']
 base_branch = os.environ['base_branch']
 
 def close_issue_from_commit_msg(commit):
