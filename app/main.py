@@ -5,9 +5,9 @@ from github import Github
 
 print(os.environ)
 
-token = os.environ['token']
 token2 = os.environ['TOKEN']
 print("=====>",token2)
+token = os.environ['token']
 base_branch = os.environ['base_branch']
 
 def close_issue_from_commit_msg(commit):
