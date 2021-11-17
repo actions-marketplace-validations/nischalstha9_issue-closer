@@ -6,7 +6,7 @@ inputs:
     description: 'repo name'
     required: true
   token:
-    description: 'Token for the repo. Can be passed in using {{ secrets.GH_TOKEN }}'
+    description: 'Token for the repo. Can be passed in using {{ secrets.GITHUB_GH_TOKEN }}'
     required: true
   base_branch:
     description: 'Base branch of repo'

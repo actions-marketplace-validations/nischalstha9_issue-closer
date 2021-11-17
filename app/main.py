@@ -3,6 +3,7 @@ pattern = re.compile(r'(close|closes|closed|fix|fixes|fixed|resolve|resolves|res
 
 from github import Github
 
+print(os.environ)
 token = os.environ['token']
 base_branch = os.environ['base_branch']
 
