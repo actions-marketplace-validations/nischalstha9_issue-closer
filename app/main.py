@@ -3,8 +3,8 @@ pattern = re.compile(r'(close|closes|closed|fix|fixes|fixed|resolve|resolves|res
 
 from github import Github
 
-token = os.environ['GITHUB_TOKEN']
-base_branch = os.environ['BASE_BRANCH']
+token = os.environ['GH_TOKEN']
+base_branch = os.environ['base_branch']
 
 def close_issue_from_commit_msg(commit):
     commit_msg = commit.commit.message.lower()
@@ -18,7 +18,7 @@ def close_issue_from_commit_msg(commit):
 
 g = Github(token)
 
-repo = g.get_repo(os.environ['REPO'])
+repo = g.get_repo(os.environ['repo'])
 branch = repo.get_branch(branch=base_branch)
 branch_head_commit = branch.commit
 close_issue_from_commit_msg(branch_head_commit)
