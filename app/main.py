@@ -23,18 +23,19 @@ def close_issue_from_commit_msg(commit):
 g = Github(token)
 
 repo = g.get_repo(str(os.environ['INPUT_REPO']))
-branch = repo.get_branch(branch=base_branch)
-branch_head_commit = branch.commit
-close_issue_from_commit_msg(branch_head_commit)
+
+if os.environ.get('GITHUB_EVENT_NAME')=="push":
+    branch = repo.get_branch(branch=base_branch)
+    branch_head_commit = branch.commit
+    close_issue_from_commit_msg(branch_head_commit)
+else:
+    pulls = repo.get_pulls(state='close', sort='created', direction='descending', base=base_branch)
+    for pr in pulls:
+        print("Pull Request no: "+str(pr.number) + " is processing...")
+        if pr.is_merged():
+            commits = pr.get_commits()
+            for commit in commits:
+                close_issue_from_commit_msg(commit)
 
 
-pulls = repo.get_pulls(state='close', sort='created', direction='descending', base=base_branch)
-for pr in pulls:
-    print("Pull Request no: "+str(pr.number) + " is processing...")
-    if pr.is_merged():
-        commits = pr.get_commits()
-        for commit in commits:
-            close_issue_from_commit_msg(commit)
-
-
-    break #breaked so that loops over only last pull request merge
+        break #breaked so that loops over only last pull request merge
