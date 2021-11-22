@@ -24,12 +24,14 @@ def close_issue_from_commit_msg(commit:Commit)->str:
     commit_msg = commit.commit.message.lower()
     matches = re.findall(pattern, commit_msg)
     if len(matches)>0:
+        closed_issues = []
         for issue in matches:
             issue = repo.get_issue(number = int(issue[1]))
             if (issue.state == 'open'):
                 issue.edit(state='closed')
+                closed_issues.append((issue.number, issue.user.login))
                 print(f"Issue {issue.number} is closed")
-                return str(issue.user.login) # returns issue opener username
+        return closed_issues # returns closed issue numbers and issuer name
 
 
 if os.environ.get('GITHUB_EVENT_NAME')=="push":
@@ -41,15 +43,15 @@ else:
     for pr in pulls:
         print("Pull Request no: "+str(pr.number) + " is processing...")
         if pr.is_merged():
-            issuers = []
             commits = pr.get_commits()
             for commit in commits:
-                issuers.append(close_issue_from_commit_msg(commit)) #given function returns issuer's name
-            try:
-                issuers_string = " @".join(issuers) #creating issuers string from issuers list
-                issuers_string = "@" + issuers_string
-            except:
-                issuers_string = ""
-            pr.create_issue_comment(body="Pull request merged and issue-closer closed issue!\n "+issuers_string)
+                closed_issues = close_issue_from_commit_msg(commit)
+                try:
+                    issuers_string = ""
+                    for i in closed_issues:
+                        issuers_string += "- "+ str(i[0]) + "by @" + str(i[1]+"\n")
+                    pr.create_issue_comment(body="Pull request merged and issue-closer closed following issues:\n"+issuers_string)
+                except:
+                    pass
         print("Pull Request no: "+str(pr.number) + " finished processing.👍️")
         break #breaked so that loops over only last pull request merge
