@@ -10,6 +10,12 @@ token = str(os.environ['INPUT_TOKEN']) #Github Token from YAML File
 base_branch = str(os.environ['INPUT_BASE_BRANCH']) #Repository base branch input from YAML File
 
 
+#initializing new Github Object with Github Access Token
+g = Github(token)
+
+#get repository on basis of repository input in YAML File
+repo = g.get_repo(str(os.environ['INPUT_REPO']))
+
 def close_issue_from_commit_msg(commit:Commit)->str:
     """
     Closes Issues Reading Issue Numbers from Commit Message.
@@ -23,13 +29,8 @@ def close_issue_from_commit_msg(commit:Commit)->str:
             if (issue.state == 'open'):
                 issue.edit(state='closed')
                 print(f"Issue {issue.number} is closed")
-                return issue.user.login # returns issue opener username
+                return str(issue.user.login) # returns issue opener username
 
-#initializing new Github Object with Github Access Token
-g = Github(token)
-
-#get repository on basis of repository input in YAML File
-repo = g.get_repo(str(os.environ['INPUT_REPO']))
 
 if os.environ.get('GITHUB_EVENT_NAME')=="push":
     branch = repo.get_branch(branch=base_branch)
@@ -44,8 +45,9 @@ else:
             commits = pr.get_commits()
             for commit in commits:
                 issuers.append(close_issue_from_commit_msg(commit))
+            print(issuers)
             issuers_string = " @".join(issuers) #creating issuers string from issuers list
             issuers_string = "@" + issuers_string
-            pr.create_comment(body="Pull request merged and issue-closer closed issue!\n "+issuers_string, position=1)
+            pr.create_issue_comment(body="Pull request merged and issue-closer closed issue!\n "+issuers_string)
         print("Pull Request no: "+str(pr.number) + " finished processing.👍️")
         break #breaked so that loops over only last pull request merge
