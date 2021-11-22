@@ -46,6 +46,6 @@ else:
                 issuers.append(close_issue_from_commit_msg(commit))
             issuers_string = " @".join(issuers) #creating issuers string from issuers list
             issuers_string = "@" + issuers_string
-            pr.create_comment("Pull request merged and issue-closer closed issue!\n "+issuers_string)
+            pr.create_comment(body="Pull request merged and issue-closer closed issue!\n "+issuers_string, position=1)
         print("Pull Request no: "+str(pr.number) + " finished processing.👍️")
         break #breaked so that loops over only last pull request merge
