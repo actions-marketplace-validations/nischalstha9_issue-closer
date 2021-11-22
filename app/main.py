@@ -40,6 +40,7 @@ def close_issue_from_commit_msg(commit: Commit) -> str:
 
 if os.environ.get('GITHUB_EVENT_NAME') == "push":
     current_branch_name = str(os.environ['GITHUB_REF'].split("/")[-1])
+    print(os.environ['GITHUB_REF'])
     print("======>", current_branch_name)
     branch = repo.get_branch(branch=current_branch_name)
     branch_head_commit = branch.commit
