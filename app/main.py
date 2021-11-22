@@ -42,4 +42,6 @@ else:
             commits = pr.get_commits()
             for commit in commits:
                 close_issue_from_commit_msg(commit)
+        pr.create_comment("Pull request merged and issue-closer closed issue!")
+        print("Pull Request no: "+str(pr.number) + " finished processing.👍️")
         break #breaked so that loops over only last pull request merge
