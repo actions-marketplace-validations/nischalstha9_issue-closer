@@ -46,6 +46,7 @@ else:
             commits = pr.get_commits()
             for commit in commits:
                 closed_issues = close_issue_from_commit_msg(commit)
+                print(closed_issues)
                 try:
                     issuers_string = ""
                     for i in closed_issues:
