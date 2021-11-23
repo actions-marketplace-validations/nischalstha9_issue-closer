@@ -38,12 +38,33 @@ def close_issue_from_commit_msg(commit: Commit) -> str:
         return closed_issues  # returns closed issue numbers and issuer name
 
 
+def get_comment_string_from_closed_issues(closed_issues):
+    """
+    Return Comment string, including issue number and mentioning issue creator's login.
+    Takes List of Tuples generated from close_issue_from_commit_msg function.
+        Ex: [(issue_number->int, issue_user->String), ......]    
+    """
+    try:
+        issuers_string = ""
+        for i in closed_issues:
+            issuers_string += "- Issue #" + \
+                str(i[0]) + " by @" + str(i[1]+"\n")
+        return issuers_string
+    except:
+        return ""
+
+
 if os.environ.get('GITHUB_EVENT_NAME') == "push":
     current_branch_name = str(
         os.environ['GITHUB_REF'].split("refs/heads/")[-1])
     branch = repo.get_branch(branch=current_branch_name)
     branch_head_commit = branch.commit
-    close_issue_from_commit_msg(branch_head_commit)
+    closed_issues = close_issue_from_commit_msg(branch_head_commit)
+    if len(closed_issues) > 0:
+        issue_cmnt_string = get_comment_string_from_closed_issues(
+            closed_issues=closed_issues)
+        branch_head_commit.create_comment(
+            body="Auto issue closer closed following issues:\n"+issue_cmnt_string)
 else:
     pulls = repo.get_pulls(state='close', sort='created',
                            direction='descending', base=base_branch)
@@ -53,15 +74,11 @@ else:
             commits = pr.get_commits()
             for commit in commits:
                 closed_issues = close_issue_from_commit_msg(commit)
-                print(closed_issues)
-                try:
-                    issuers_string = ""
-                    for i in closed_issues:
-                        issuers_string += "- Issue #" + \
-                            str(i[0]) + " by @" + str(i[1]+"\n")
+                # print(closed_issues)
+                if len(closed_issues) > 0:
+                    issuers_string = get_comment_string_from_closed_issues(
+                        closed_issues=closed_issues)
                     pr.create_issue_comment(
                         body="Pull request merged and issue-closer closed following issues:\n"+issuers_string)
-                except:
-                    pass
         print("Pull Request no: "+str(pr.number) + " finished processing.👍️")
         break  # breaked so that loops over only last pull request merge
