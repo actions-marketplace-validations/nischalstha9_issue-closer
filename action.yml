@@ -1,4 +1,4 @@
-name: "Naxa's Issue Closer"
+name: "Github Auto Issue Closer"
 author: "nischalstha9@gmail.com"
 description: 'Close issues using special keywords just like github but you can choose branch'
 inputs:
