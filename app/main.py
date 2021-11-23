@@ -20,22 +20,22 @@ g = Github(token)
 repo = g.get_repo(str(os.environ['INPUT_REPO']))
 
 
-def close_issue_from_commit_msg(commit: Commit) -> str:
+def close_issue_from_commit_msg(commit: Commit):
     """
     Closes Issues Reading Issue Numbers from Commit Message.
     For example: commit message: 'close #18 resolve #19' closes issues number 18 and 19.
     """
     commit_msg = commit.commit.message.lower()
     matches = re.findall(pattern, commit_msg)
+    closed_issues = []
     if len(matches) > 0:
-        closed_issues = []
         for issue in matches:
             issue = repo.get_issue(number=int(issue[1]))
             if (issue.state == 'open'):
                 issue.edit(state='closed')
                 closed_issues.append((issue.number, issue.user.login))
                 print(f"Issue {issue.number} is closed")
-        return closed_issues  # returns closed issue numbers and issuer name
+    return closed_issues  # returns closed issue numbers and issuer name
 
 
 def get_comment_string_from_closed_issues(closed_issues):
@@ -54,31 +54,32 @@ def get_comment_string_from_closed_issues(closed_issues):
         return ""
 
 
-if os.environ.get('GITHUB_EVENT_NAME') == "push":
-    current_branch_name = str(
-        os.environ['GITHUB_REF'].split("refs/heads/")[-1])
-    branch = repo.get_branch(branch=current_branch_name)
-    branch_head_commit = branch.commit
-    closed_issues = close_issue_from_commit_msg(branch_head_commit)
-    if len(closed_issues) > 0:
-        issue_cmnt_string = get_comment_string_from_closed_issues(
-            closed_issues=closed_issues)
-        branch_head_commit.create_comment(
-            body="Auto issue closer closed following issues:\n"+issue_cmnt_string)
-else:
-    pulls = repo.get_pulls(state='close', sort='created',
-                           direction='descending', base=base_branch)
-    for pr in pulls:
-        print("Pull Request no: "+str(pr.number) + " is processing...")
-        if pr.is_merged():
-            commits = pr.get_commits()
-            for commit in commits:
-                closed_issues = close_issue_from_commit_msg(commit)
-                # print(closed_issues)
-                if len(closed_issues) > 0:
-                    issuers_string = get_comment_string_from_closed_issues(
-                        closed_issues=closed_issues)
-                    pr.create_issue_comment(
-                        body="Pull request merged and issue-closer closed following issues:\n"+issuers_string)
-        print("Pull Request no: "+str(pr.number) + " finished processing.👍️")
-        break  # breaked so that loops over only last pull request merge
+if __name__ == "__main__":
+    if os.environ.get('GITHUB_EVENT_NAME') == "push":
+        current_branch_name = str(
+            os.environ['GITHUB_REF'].split("refs/heads/")[-1])
+        branch = repo.get_branch(branch=current_branch_name)
+        branch_head_commit = branch.commit
+        closed_issues = close_issue_from_commit_msg(branch_head_commit)
+        if len(closed_issues) > 0:
+            issue_cmnt_string = get_comment_string_from_closed_issues(
+                closed_issues=closed_issues)
+            branch_head_commit.create_comment(
+                body="Auto issue closer closed following issues:\n"+issue_cmnt_string)
+    else:
+        pulls = repo.get_pulls(state='close', sort='created',
+                               direction='descending', base=base_branch)
+        for pr in pulls:
+            print("Pull Request no: "+str(pr.number) + " is processing...")
+            if pr.is_merged():
+                commits = pr.get_commits()
+                for commit in commits:
+                    closed_issues = close_issue_from_commit_msg(commit)
+                    # print(closed_issues)
+                    if len(closed_issues) > 0:
+                        issuers_string = get_comment_string_from_closed_issues(
+                            closed_issues=closed_issues)
+                        pr.create_issue_comment(
+                            body="Pull request merged and issue-closer closed following issues:\n"+issuers_string)
+            print("Pull Request no: "+str(pr.number) + " finished processing.👍️")
+            break  # breaked so that loops over only last pull request merge
